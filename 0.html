@@ -1,0 +1,166 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="googlebot" content="noindex, nofollow">
+  <script type="text/javascript" src="/js/lib/dummy.js"></script>  
+    <link rel="stylesheet" type="text/css" href="/css/result-light.css">
+  <style type="text/css">
+    body {
+  overflow: hidden
+}
+  </style>
+  <title>hw0 by hk006008</title>
+<script type='text/javascript'>
+window.onload=function(){
+var renderer, scene, camera, controls, train, angle = 0 , angle2 = 0;
+var realtrain, realtrain2;
+
+init();
+animate();
+
+function init() {
+
+  renderer = new THREE.WebGLRenderer();
+  document.body.appendChild(renderer.domElement);
+  var width = window.innerWidth;
+  var height = window.innerHeight;
+  renderer.setSize(width, height);
+
+  renderer.setClearColor(0x330033);
+
+  scene = new THREE.Scene();
+  var grid = new THREE.GridHelper(10, 1);
+  scene.add(grid);
+  var axes = new THREE.AxisHelper(5);
+  scene.add(axes);
+
+  camera = new THREE.PerspectiveCamera(35, width / height, 1, 100);
+  camera.position.y = 30;
+  camera.position.z = 25;
+  camera.lookAt(new THREE.Vector3(0, 0, 0));
+
+  controls = new THREE.OrbitControls(camera, renderer.domElement);
+
+  ///////////////////////////////////////////////////////////////////////////
+  train = new THREE.Object3D();
+  var cube = new THREE.Mesh(new THREE.BoxGeometry(3, 1, 2), new THREE.MeshNormalMaterial());
+  cube.position.y = 0.5;
+  cube.rotation.y = Math.PI / 2;
+  train.add(cube);
+  
+  var cube2 = new THREE.Mesh(new THREE.BoxGeometry(1, 2, 1.9), new THREE.MeshNormalMaterial());
+  cube2.position.y = 1.5;
+  //cube2.position.x = -0.5;
+  cube2.position.z = -0.5;
+  cube2.rotation.z = Math.PI / 2;
+  train.add(cube2);
+  
+  var cube3 = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.7, 0.3), new THREE.MeshNormalMaterial());
+  cube3.position.y = 2.2;
+  cube3.position.x = -0.8;
+  cube3.position.z = -1.25;
+  //cube3.rotation.z = Math.PI / 2;
+  train.add(cube3);
+  
+  var cube4 = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.7, 0.3), new THREE.MeshNormalMaterial());
+  cube4.position.y = 2.2;
+  cube4.position.x = 0.8;
+  cube4.position.z = -1.25;
+  //cube3.rotation.z = Math.PI / 2;
+  train.add(cube4);
+  
+  var cube5 = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.7, 0.3), new THREE.MeshNormalMaterial());
+  cube5.position.y = 2.2;
+  cube5.position.x = 0.8;
+  cube5.position.z = 0.25;
+  //cube3.rotation.z = Math.PI / 2;
+  train.add(cube5);
+  
+  var cube6 = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.7, 0.3), new THREE.MeshNormalMaterial());
+  cube6.position.y = 2.2;
+  cube6.position.x = -0.8;
+  cube6.position.z = 0.25;
+  //cube3.rotation.z = Math.PI / 2;
+  train.add(cube6);
+  
+  var top = new THREE.Mesh(new THREE.BoxGeometry(2, 0.3, 2), new THREE.MeshNormalMaterial());
+  top.position.y = 2.7;
+  top.position.x = 0;
+  top.position.z = -0.5;
+  //cube3.rotation.z = Math.PI / 2;
+  train.add(top);
+  
+  var geometry = new THREE.CylinderGeometry( 0.5, 0.5, 2.8, 32 );
+	var material = new THREE.MeshNormalMaterial();
+	var cylinder = new THREE.Mesh( geometry, material );
+  cylinder.rotation.x = Math.PI / 2;
+  cylinder.position.y = 1.5;
+	train.add( cylinder );
+  
+  var geometry = new THREE.CylinderGeometry( 0.03, 0.03, 0.48, 32 );
+	var cylinder2 = new THREE.Mesh( geometry, material );
+  cylinder2.position.y = 1.9;
+  cylinder2.position.z = 1.3;
+	train.add( cylinder2 );
+  
+  var geometry = new THREE.CylinderGeometry( 0.08, 0.08, 0.5, 32 );
+	var cylinder3 = new THREE.Mesh( geometry, material );
+  cylinder3.position.y = 2;
+  cylinder3.position.z = 1.1;
+	train.add( cylinder3 );
+  //////////////////////////////////////
+  torus = new THREE.Mesh(new THREE.TorusGeometry(6.1, 2, 2, 100), new THREE.MeshNormalMaterial());
+  torus.rotation.x = Math.PI / 2;
+  torus.position.set(0, 0.05, 0);
+  scene.add(torus);
+  //////////////////////////////////////
+  //train.add(cube);
+  
+  train2 = train.clone();
+  
+  train.rotation.y = Math.PI;
+  realtrain = new THREE.Object3D();
+  realtrain.add(train);  
+  
+  scene.add(realtrain);
+  
+  train2.rotation.y = Math.PI;
+  realtrain2 = new THREE.Object3D();
+  realtrain2.add(train2);  
+  
+  scene.add(realtrain2);
+}
+
+function animate() {
+
+  angle  -= 0.005;
+  angle2 += 0.005;
+  realtrain.position.set(5 * Math.cos(angle), 0, 5 * Math.sin(angle));
+  realtrain.rotation.y = -angle;
+  
+  realtrain2.position.set(-7 * Math.cos(angle2), 0, -7 * Math.sin(angle2));
+  realtrain2.rotation.y = -angle2;
+  
+  controls.update();
+  requestAnimationFrame(animate);
+  render();
+
+}
+
+function render() {
+
+  renderer.render(scene, camera);
+
+}
+
+}
+</script>  
+</head>
+<body>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r78/three.min.js"></script>
+<script src="https://dl.dropboxusercontent.com/u/3587259/Code/Threejs/OrbitControls.js"></script>
+</body>
+</html>
+
