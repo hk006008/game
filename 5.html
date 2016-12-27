@@ -1,0 +1,402 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="googlebot" content="noindex, nofollow">
+    <script type="text/javascript" src="/js/lib/dummy.js"></script>
+    <link rel="stylesheet" type="text/css" href="/css/normalize.css">
+    <link rel="stylesheet" type="text/css" href="/css/result-light.css">
+    <style type="text/css">
+        body {
+            background-color: #fff;
+            color: #111;
+            margin: 0px;
+            overflow: hidden;
+            font-family: Monospace;
+            font-size: 20px;
+        }
+
+        #info {
+            position: absolute;
+            top: 0px;
+            width: 100%;
+            padding: 5px;
+            text-align: center;
+            color: #ffff00;
+        }
+    </style>
+
+    <title>hw5</title>
+
+
+</head>
+
+<body>
+    <div id="info">
+        hw5 <br />
+        <button id="toggle" style="width:20%">Button</button>
+    </div>
+    <audio id='music' loop src='https://hk006008.github.io//game/Bass%20Drum%20Battle.mp3'></audio>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r70/three.min.js"></script>
+    <script src="https://dl.dropboxusercontent.com/u/3587259/Code/Threejs/OrbitControls.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.5.1/dat.gui.min.js"></script>
+    <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+
+    <script type='text/javascript'>
+
+var scene, renderer, camera, controls;
+var body, lowerArm, upperArm;
+
+var gcontrols, turn = false;
+var theta1 = 0,
+  theta2 = 0,
+  theta3 = 0,
+  theta4 = 0,
+  Ltheta1 = 0,
+  Ltheta2 = 0,
+  Ltheta3 = 0,
+  Ltheta4 = 0;
+var torsoTurn = 0;
+var keys = [
+  [0,/*右手下  左手下*/ [-0.7150290579808083,-0.2970671712393569,-1.1170293282876065,0.8678875523719416,-0.7150290579808083,0.2970671712393569,1.1170293282876065,0.8678875523719416]],
+  [0.05,/*右手上  左手下*/ [-1.3097040140559535,-0.2970671712393569,-1.4502635491282605,-0.07136363341190854,-0.7150290579808083,0.2970671712393569,1.1170293282876065,0.8678875523719416]],
+  [0.1,/*右手下  左手下  蹦*/ [-0.7150290579808083,-0.2970671712393569,-1.1170293282876065,0.8678875523719416,-0.7150290579808083,0.2970671712393569,1.1170293282876065,0.8678875523719416]],
+  [0.15,/*右手下  左手下*/ [-0.7150290579808083,-0.2970671712393569,-1.1170293282876065,0.8678875523719416,-0.7150290579808083,0.2970671712393569,1.1170293282876065,0.8678875523719416]],
+  [0.2,/*右手下  左手下*/ [-0.7150290579808083,-0.2970671712393569,-1.1170293282876065,0.8678875523719416,-0.7150290579808083,0.2970671712393569,1.1170293282876065,0.8678875523719416]],
+  [0.25,/*右手下  左手上*/ [-0.7150290579808083,-0.2970671712393569,-1.1170293282876065,0.8678875523719416,-1.3097040140559535,0.2970671712393569,1.4502635491282605,0.07136363341190854]],
+  [0.3,/*右手下  左手下  蹦*/ [-0.7150290579808083,-0.2970671712393569,-1.1170293282876065,0.8678875523719416,-0.7150290579808083,0.2970671712393569,1.1170293282876065,0.8678875523719416]],
+  [0.35,/*右手下  左手下*/ [-0.7150290579808083,-0.2970671712393569,-1.1170293282876065,0.8678875523719416,-0.7150290579808083,0.2970671712393569,1.1170293282876065,0.8678875523719416]],
+  [0.4,/*右手下  左手上*/ [-0.7150290579808083,-0.2970671712393569,-1.1170293282876065,0.8678875523719416,-1.3097040140559535,0.2970671712393569,1.4502635491282605,0.07136363341190854]],
+  [0.45,/*右手上  左手下  蹦*/ [-1.3097040140559535,-0.2970671712393569,-1.4502635491282605,-0.07136363341190854,-0.7150290579808083,0.2970671712393569,1.1170293282876065,0.8678875523719416]],
+  [0.5,/*右手下  左手下  蹦*/ [-0.7150290579808083,-0.2970671712393569,-1.1170293282876065,0.8678875523719416,-0.7150290579808083,0.2970671712393569,1.1170293282876065,0.8678875523719416]],
+  [0.55,/*右手下  左手小上*/ [-0.7150290579808083,-0.2970671712393569,-1.1170293282876065,0.8678875523719416,-0.8150290579808083,0.2970671712393569,1.2170293282876065,0.7678875523719416]],
+  [0.6,/*右手小上  左手下  蹦*/ [-0.8150290579808083,-0.2970671712393569,-1.2170293282876065,0.7678875523719416,-0.7150290579808083,0.2970671712393569,1.1170293282876065,0.8678875523719416]],
+  [0.65,/*右手下  左手下  蹦*/ [-0.7150290579808083,-0.2970671712393569,-1.1170293282876065,0.8678875523719416,-0.7150290579808083,0.2970671712393569,1.1170293282876065,0.8678875523719416]],
+  [0.7,/*右手下  左手上*/ [-0.7150290579808083,-0.2970671712393569,-1.1170293282876065,0.8678875523719416,-1.3097040140559535,0.2970671712393569,1.4502635491282605,0.07136363341190854]],
+  [0.75,/*右手上  左手下  左蹦*/ [-1.3097040140559535,-0.2970671712393569,-1.4502635491282605,-0.07136363341190854,-0.7150290579808083,0.2970671712393569,1.1170293282876065,0.8678875523719416]],
+  [0.8,/*右手下  左手下  右蹦*/ [-0.7150290579808083,-0.2970671712393569,-1.1170293282876065,0.8678875523719416,-0.7150290579808083,0.2970671712393569,1.1170293282876065,0.8678875523719416]],
+  [0.85,/*右手下  左手小上*/ [-0.7150290579808083,-0.2970671712393569,-1.1170293282876065,0.8678875523719416,-0.8150290579808083,0.2970671712393569,1.2170293282876065,0.7678875523719416]],
+  [0.9,/*右手小上  左手下  左小蹦*/ [-0.8150290579808083,-0.2970671712393569,-1.2170293282876065,0.7678875523719416,-0.7150290579808083,0.2970671712393569,1.1170293282876065,0.8678875523719416]],
+  [0.95,/*右手下  左手下  右小蹦*/ [-0.7150290579808083,-0.2970671712393569,-1.1170293282876065,0.8678875523719416,-0.7150290579808083,0.2970671712393569,1.1170293282876065,0.8678875523719416]],
+  [1,/*右手下  左手下*/ [-0.7150290579808083,-0.2970671712393569,-1.1170293282876065,0.8678875523719416,-0.7150290579808083,0.2970671712393569,1.1170293282876065,0.8678875523719416]]
+];
+var T = 4;
+var clock = new THREE.Clock();
+var ts = clock.getElapsedTime();
+var intKey=[];
+
+init();
+animate();
+$("#toggle").click(function() {
+	console.log(turn);
+  turn = !turn;
+  if (turn){
+    clock.start();
+    document.getElementById('music').play();
+    }
+  else{
+    document.getElementById('music').pause();
+    clock.stop();
+  }
+});
+function makeStick() {
+  var stick = new THREE.Object3D();
+  var bar = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 10), new THREE.MeshNormalMaterial());
+  bar.position.y = -55;
+  bar.position.z = 10;
+  bar.position.x = -5;
+  bar.rotation.x = Math.PI/2;
+  stick.add(bar);
+  return stick;
+}
+
+function buildBody () {
+  var body = new THREE.Object3D();
+  var boxGeometry = new THREE.BoxGeometry(50, 100, 30);
+  var bodyMesh = new THREE.Mesh(boxGeometry, new THREE.MeshNormalMaterial());
+  bodyMesh.position.set(0, 50, 0);
+  body.add(bodyMesh);
+  ////////////////////////////////////////////////////
+  var drum = new THREE.CylinderGeometry(35, 35, 30, 32);
+  var drumMesh = new THREE.Mesh(drum, new THREE.MeshNormalMaterial());
+  drumMesh.rotation.z = Math.PI / 2;
+  drumMesh.position.set(0,50,50);
+	body.add(drumMesh);
+  var head = new THREE.Mesh (new THREE.CylinderGeometry(12,15,15,32), new THREE.MeshNormalMaterial());
+  head.position.set(0,120,0);
+  body.add(head);
+  /////////////////////////////////////////////////////
+  var boxGeometry = new THREE.BoxGeometry(10, 40, 10);
+  var arm = new THREE.Mesh(boxGeometry, new THREE.MeshNormalMaterial());
+  var armL = new THREE.Mesh(boxGeometry, new THREE.MeshNormalMaterial());
+
+  upperArm = new THREE.Object3D();
+  upperArmL = new THREE.Object3D();
+
+  upperArm.add(arm);
+  upperArmL.add(armL);
+
+  arm.position.set(-5, -20, 0);
+  armL.position.set(5, -20, 0);
+
+  body.add(upperArm);
+  body.add(upperArmL);
+  upperArm.position.set(-25, 100, 0);
+  upperArmL.position.set(25, 100, 0);
+
+	boxGeometry = new THREE.BoxGeometry(10, 60, 10);
+  arm2 = new THREE.Mesh(boxGeometry, new THREE.MeshNormalMaterial());
+  arm2L = new THREE.Mesh(boxGeometry, new THREE.MeshNormalMaterial());
+
+  lowerArm = new THREE.Object3D();
+  lowerArmL = new THREE.Object3D();
+
+  lowerArm.position.set(0, -40, 0);
+  lowerArmL.position.set(0, -40, 0);
+
+  /////////////////////////////////////
+  var stick = makeStick();
+  var stickL = makeStick();
+
+  lowerArm.add(stick);
+  stickL.position.x+=10;
+  lowerArmL.add(stickL);
+  /////////////////////////////////////
+  upperArm.add(lowerArm);
+  upperArmL.add(lowerArmL);
+
+  lowerArm.add(arm2);
+  lowerArmL.add(arm2L);
+
+
+  arm2.position.set(-5, -30, 0);
+  arm2L.position.set(5, -30, 0);
+
+	return body;
+}
+
+function init() {
+document.getElementById('music').volume = 0.1;
+document.getElementById('music').playbackRate = 1.03;
+	var width = window.innerWidth;
+  var height = window.innerHeight;
+
+  renderer = new THREE.WebGLRenderer({
+    antialias: true
+  });
+  renderer.setSize(width, height);
+  renderer.setClearColor(0x888888);
+
+  document.body.appendChild(renderer.domElement);
+
+  scene = new THREE.Scene();
+
+  camera = new THREE.PerspectiveCamera(40, width / height, 0.1, 10000);
+  camera.position.y = 250;
+  camera.position.z = 500;
+  camera.lookAt(new THREE.Vector3(0, 0, 0));
+  scene.add(camera);
+
+  controls = new THREE.OrbitControls(camera, renderer.domElement);
+
+	var gridXZ = new THREE.GridHelper(100, 10);
+  gridXZ.setColors(new THREE.Color(0xff0000), new THREE.Color(0xffffff));
+  scene.add(gridXZ);
+  window.addEventListener('resize', onWindowResize, false);
+
+  /////////////////////////////////////////////////
+  body = buildBody();
+  scene.add(body);
+  body.position.set(0, 0, -35);
+  body.rotation.y =0;// Math.PI/12;  // torsoTurn
+
+	////////////////////////////////////////////////////////////
+	// intial values must be POSITIVE
+  gcontrols = {
+
+		shoulderX: 0.01,
+    shoulderZ: 0.01,
+    elbowX: 0.01,
+    elbowZ: 0.01,
+    LshoulderX: 0.01,
+    LshoulderZ: 0.01,
+    LelbowX: 0.01,
+    LelbowZ: 0.01,
+
+  };
+
+  var gui = new dat.GUI({
+  	load: loadJSON(),
+    preset: 'Default'
+  });
+  gui.domElement.id = 'gui';
+  gui.remember(gcontrols);
+
+  //gui.domElement.id = 'gui';
+	gui.add(gcontrols, 'shoulderX', -1.5, 0.7).listen();
+  gui.add(gcontrols, 'shoulderZ', -2, 1.5).listen();
+  gui.add(gcontrols, 'elbowX', -1.5, 0.04).listen();
+  gui.add(gcontrols, 'elbowZ', -1.5, 1.5).listen();
+
+  gui.add(gcontrols, 'LshoulderX', -1.5, 0.7).listen();
+  gui.add(gcontrols, 'LshoulderZ', -1.5, 2).listen();
+  gui.add(gcontrols, 'LelbowX', -0.04, 1.5).listen();
+  gui.add(gcontrols, 'LelbowZ', -1.5, 1.5).listen();
+
+}
+
+function loadJSON() {
+  return {
+  "preset": "Default",
+  "remembered": {
+    "Default": {
+      "0": {
+        "shoulderX": -0.7150290579808083,
+        "shoulderZ": -0.2970671712393569,
+        "elbowX": -1.4502635491282605,
+        "elbowZ": -0.07136363341190854,
+        "LshoulderX": -0.7150290579808083,
+        "LshoulderZ": 0.2970671712393569,
+        "LelbowX": 1.1170293282876065,
+        "LelbowZ": 0.8678875523719416
+      }
+    },
+    "start": {
+      "0": {
+        "shoulderX": -1.3097040140559535,
+        "shoulderZ": -0.2970671712393569,
+        "elbowX": -1.4502635491282605,
+        "elbowZ": -0.07136363341190854,
+        "LshoulderX": -0.7150290579808083,
+        "LshoulderZ": 0.2970671712393569,
+        "LelbowX": 1.1170293282876065,
+        "LelbowZ": 0.8678875523719416
+      }
+    },
+    "start1": {
+      "0": {
+        "shoulderX": -0.8150290579808083,
+        "shoulderZ": -0.2970671712393569,
+        "elbowX": -1.2170293282876065,
+        "elbowZ": 0.7678875523719416,
+        "LshoulderX": -0.8150290579808083,
+        "LshoulderZ": 0.2970671712393569,
+        "LelbowX": 1.2170293282876065,
+        "LelbowZ": 0.7678875523719416
+      }
+    },
+    "start2": {
+      "0": {
+        "shoulderX": -0.8150290579808083,
+        "shoulderZ": -0.2970671712393569,
+        "elbowX": -1.2170293282876065,
+        "elbowZ": 0.7678875523719416,
+        "LshoulderX": -0.7150290579808083,
+        "LshoulderZ": 0.2970671712393569,
+        "LelbowX": 1.1170293282876065,
+        "LelbowZ": 0.8678875523719416
+      }
+    },
+    "end": {
+      "0": {
+        "shoulderX": -0.7150290579808083,
+        "shoulderZ": -0.2970671712393569,
+        "elbowX": -1.1170293282876065,
+        "elbowZ": 0.8678875523719416,
+        "LshoulderX": -1.3097040140559535,
+        "LshoulderZ": 0.2970671712393569,
+        "LelbowX": 1.4502635491282605,
+        "LelbowZ": 0.07136363341190854
+      }
+    }
+  },
+  "closed": false,
+  "folders": {}
+}
+}
+function keyframe (t) {
+	var s = ((t - ts)%T)/T;
+  for (var i = 0; i < keys.length; i++) {
+  	if (keys[i][0] > s) break;
+  }
+  var ii = i - 1;
+  var a = (s - keys[ii][0]) / (keys[ii+1][0] - keys[ii][0]);
+  intKey = [keys[ii][1][0] * (1-a) + keys[ii+1][1][0]*a,
+  keys[ii][1][1] * (1-a) + keys[ii+1][1][1]*a,
+  keys[ii][1][2] * (1-a) + keys[ii+1][1][2]*a,
+  keys[ii][1][3] * (1-a) + keys[ii+1][1][3]*a,
+  keys[ii][1][4] * (1-a) + keys[ii+1][1][4]*a,
+  keys[ii][1][5] * (1-a) + keys[ii+1][1][5]*a,
+  keys[ii][1][6] * (1-a) + keys[ii+1][1][6]*a,
+  keys[ii][1][7] * (1-a) + keys[ii+1][1][7]*a];
+}
+function animate() {
+
+  if(turn != false)keyframe(clock.getElapsedTime());
+  requestAnimationFrame(animate);
+  if(turn != false)update();
+  render();
+
+}
+
+function update() {
+  controls.update();
+
+  /*theta1 = gcontrols.shoulderX;
+  theta2 = gcontrols.shoulderZ;
+  theta3 = gcontrols.elbowX;
+  theta4 = gcontrols.elbowZ;
+
+  Ltheta1 = gcontrols.LshoulderX;
+  Ltheta2 = gcontrols.LshoulderZ;
+  Ltheta3 = gcontrols.LelbowX;
+  Ltheta4 = gcontrols.LelbowZ;
+  */theta1 = intKey[0];
+  theta2 = intKey[1];
+  theta3 = intKey[2];
+  theta4 = intKey[3];
+  //console.log(intKey[4]);
+  Ltheta1 = intKey[4];
+  Ltheta2 = intKey[5];
+  Ltheta3 = intKey[6];
+  Ltheta4 = intKey[7];
+}
+
+function onWindowResize() {
+  var width = window.innerWidth,
+    height = window.innerHeight;
+  camera.aspect = width / height;
+  camera.updateProjectionMatrix();
+  renderer.setSize(width, height);
+}
+        
+function render() {
+  upperArm.rotation.z = theta1;
+  upperArmL.rotation.z = -Ltheta1;
+
+  upperArm.rotation.x = theta2;
+  upperArmL.rotation.x = -Ltheta2;
+
+  upperArm.rotation.order = 'ZXY';
+  upperArmL.rotation.order = 'ZXY';
+
+  lowerArm.rotation.x = theta3;
+  lowerArm.rotation.z = theta4;
+	lowerArmL.rotation.x = -Ltheta3;
+  lowerArmL.rotation.z = -Ltheta4;
+
+  renderer.render(scene, camera);
+}
+    </script>
+    <script>
+  // tell the embed parent frame the height of the content
+  if (window.parent && window.parent.parent){
+    window.parent.parent.postMessage(["resultsFrame", {
+      height: document.body.getBoundingClientRect().height,
+      slug: "None"
+    }], "*")
+  }
+    </script>
+</body>
+</html>
